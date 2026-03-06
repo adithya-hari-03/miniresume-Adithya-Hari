@@ -1,3 +1,5 @@
+from pymongo import MongoClient
+from bson import ObjectId
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -7,8 +9,11 @@ import os
 
 app = FastAPI(title="Mini Resume Management API")
 
+client = MongoClient("mongodb://localhost:27017")
+db = client["resume_database"]
+collection = db["candidates"]
 # In-memory storage
-candidates = []
+
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -63,17 +68,18 @@ async def create_candidate(
     candidate_data = {
         "id": candidate_id,
         "full_name": full_name,
-        "dob": dob,
+        "dob": dob.isoformat(),
         "contact_number": contact_number,
         "contact_address": contact_address,
         "education_qualification": education_qualification,
         "graduation_year": graduation_year,
         "years_of_experience": years_of_experience,
         "skill_set": [skill.strip().lower() for skill in skill_set.split(",")],
-        "resume_filename": resume.filename
+        "resume_filename": f"{candidate_id}_{resume.filename}"
     }
 
-    candidates.append(candidate_data)
+
+    collection.insert_one(candidate_data)
 
     return candidate_data
 
@@ -84,7 +90,7 @@ def list_candidates(
     experience: Optional[float] = Query(None),
     graduation_year: Optional[int] = Query(None)
 ):
-    results = candidates
+    results = list(collection.find({}, {"_id": 0}))
 
     if skill:
         results = [
@@ -109,18 +115,22 @@ def list_candidates(
 
 @app.get("/candidates/{candidate_id}", response_model=CandidateResponse)
 def get_candidate(candidate_id: str):
-    for candidate in candidates:
-        if candidate["id"] == candidate_id:
-            return candidate
+
+    candidate = collection.find_one({"id": candidate_id})
+
+    if candidate:
+
+        return candidate
 
     raise HTTPException(status_code=404, detail="Candidate not found")
 
 
 @app.delete("/candidates/{candidate_id}", status_code=200)
 def delete_candidate(candidate_id: str):
-    for candidate in candidates:
-        if candidate["id"] == candidate_id:
-            candidates.remove(candidate)
-            return {"message": "Candidate deleted successfully"}
+
+    result = collection.delete_one({"id": candidate_id})
+
+    if result.deleted_count == 1:
+        return {"message": "Candidate deleted successfully"}
 
     raise HTTPException(status_code=404, detail="Candidate not found")
