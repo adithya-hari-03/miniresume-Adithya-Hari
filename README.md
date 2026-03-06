@@ -6,6 +6,7 @@ This project implements a REST API using FastAPI that allows:
 
 - Uploading resumes (PDF/DOC/DOCX)
 - Storing candidate metadata
+- Persisting candidate data in MongoDB database
 - Categorizing candidates by skills and experience
 - Filtering/searching candidates
 - Fetching candidate by ID
@@ -18,12 +19,14 @@ This project implements a REST API using FastAPI that allows:
 - Python 3.11
 - FastAPI
 - Uvicorn
+- MongoDB
+- PyMongo
 
 ---
 
 ## Project Structure
 
-miniresume-Adithya Hari/
+miniresume-Adithya-Hari/
 │
 ├── main.py  
 ├── requirements.txt  
@@ -41,29 +44,61 @@ git clone https://github.com/adithya-hari-03/miniresume-Adithya-Hari.git
 cd miniresume-Adithya-Hari
 ```
 
+---
+
 ### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
+---
+
 ### 3. Activate the virtual environment
 
-**Windows:**
+Windows:
+
 ```bash
 .venv\Scripts\activate
 ```
 
-**Mac/Linux:**
+Mac/Linux:
+
 ```bash
 source .venv/bin/activate
 ```
+
+---
 
 ### 4. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
+
+---
+
+### 5. Ensure MongoDB is running
+
+The application uses a local MongoDB instance:
+
+```
+mongodb://localhost:27017
+```
+
+Database used:
+
+```
+resume_database
+```
+
+Collection:
+
+```
+candidates
+```
+
+You can verify data using **MongoDB Compass**.
 
 ---
 
@@ -109,23 +144,27 @@ Response:
 
 Form Data Fields:
 
-- full_name  
-- dob (YYYY-MM-DD)  
-- contact_number  
-- contact_address  
-- education_qualification  
-- graduation_year  
-- years_of_experience  
-- skill_set (comma-separated values)  
-- resume (PDF/DOC/DOCX file upload)  
+- full_name
+- dob (YYYY-MM-DD)
+- contact_number
+- contact_address
+- education_qualification
+- graduation_year
+- years_of_experience
+- skill_set (comma-separated values)
+- resume (PDF/DOC/DOCX file upload)
 
 Success Response: **201 Created**
 
 Example skill_set:
 
 ```
-python, fastapi, sql
+python, fastapi, mongodb
 ```
+
+Uploaded resume files are stored in the `uploads/` folder.
+
+Candidate metadata is stored in **MongoDB**.
 
 ---
 
@@ -135,9 +174,9 @@ python, fastapi, sql
 
 Optional Query Parameters:
 
-- skill  
-- experience  
-- graduation_year  
+- skill
+- experience
+- graduation_year
 
 Example:
 
@@ -151,7 +190,7 @@ Example:
 
 **GET /candidates/{id}**
 
-Returns candidate details.
+Returns candidate details stored in the database.
 
 ---
 
@@ -169,11 +208,35 @@ Response:
 
 ---
 
+## Data Persistence
+
+Candidate data is stored in **MongoDB**.
+
+Each submission stores:
+
+- Candidate personal details
+- Education details
+- Skills
+- Resume filename
+- Unique candidate ID
+
+This allows the API to **persist and retrieve candidate information reliably**.
+
+---
+
 ## Notes
 
-- Data is stored in memory (no database required).
-- Uploaded resumes are stored inside the `uploads/` folder.
-- Only PDF, DOC, and DOCX file types are allowed.
+- Only **PDF, DOC, and DOCX** files are accepted.
+- Resume files are stored in the `uploads/` directory.
+- Candidate information is stored in **MongoDB database**.
+- APIs can retrieve and filter stored candidates.
 
+---
 
+## Author
 
+Adithya Hari
+
+## Author
+
+Adithya Hari
