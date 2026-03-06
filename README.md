@@ -233,10 +233,8 @@ This allows the API to **persist and retrieve candidate information reliably**.
 
 ---
 
-## Author
-
-Adithya Hari
 
 ## Author
 
 Adithya Hari
+
